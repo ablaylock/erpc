@@ -36,6 +36,11 @@
 //#endif
 //included from serial.h
 
+#ifdef WIN32
+#include <io.h>
+#endif // WIN32
+
+
 #include "serial.h"
 
 int serial_setup(int fd, speed_t speed)
@@ -43,7 +48,7 @@ int serial_setup(int fd, speed_t speed)
 #ifdef WIN32
     COMMTIMEOUTS timeouts;
     DCB dcb = { 0 };
-    HANDLE hCom = (HANDLE)fd;
+    HANDLE hCom = reinterpret_cast<HANDLE>(_get_osfhandle(fd));
 
     dcb.DCBlength = sizeof(dcb);
 
@@ -130,7 +135,7 @@ int serial_set_read_timeout(int fd, uint8_t vtime, uint8_t vmin)
 {
 #ifdef WIN32
     COMMTIMEOUTS timeouts;
-    HANDLE hCom = (HANDLE)fd;
+    HANDLE hCom = reinterpret_cast<HANDLE>(_get_osfhandle(fd));
 
     // These timeouts mean:
     // read: return if:
@@ -142,11 +147,11 @@ int serial_set_read_timeout(int fd, uint8_t vtime, uint8_t vmin)
     // only ReadTotalTimeoutConstant applies.
     // write: timeouts not used
     // reference: http://www.robbayer.com/files/serial-win.pdf
-    if (timeoutMs != 0)
+    if (vtime != 0)
     {
         timeouts.ReadIntervalTimeout = 1000;
         timeouts.ReadTotalTimeoutMultiplier = 10;
-        timeouts.ReadTotalTimeoutConstant = timeoutMs;
+        timeouts.ReadTotalTimeoutConstant = vtime;
         timeouts.WriteTotalTimeoutMultiplier = 0;
         timeouts.WriteTotalTimeoutConstant = 0;
     }
@@ -197,7 +202,7 @@ int serial_set_read_timeout(int fd, uint8_t vtime, uint8_t vmin)
 int serial_write(int fd, char *buf, int size)
 {
 #ifdef WIN32
-    HANDLE hCom = (HANDLE)fd;
+    HANDLE hCom = reinterpret_cast<HANDLE>(_get_osfhandle(fd));
     unsigned long bwritten = 0;
 
     if (!WriteFile(hCom, buf, size, &bwritten, NULL))
@@ -206,7 +211,11 @@ int serial_write(int fd, char *buf, int size)
     }
     else
     {
-        return bwritten;
+		if (0 != FlushFileBuffers(hCom))
+		{
+			return bwritten;
+		}
+		return 0;
     }
 #else
     return write(fd, buf, size);
@@ -216,7 +225,7 @@ int serial_write(int fd, char *buf, int size)
 int serial_read(int fd, char *buf, int size)
 {
 #ifdef WIN32
-    HANDLE hCom = (HANDLE)fd;
+    HANDLE hCom = reinterpret_cast<HANDLE>(_get_osfhandle(fd));
     unsigned long bread = 0;
 
     if (!ReadFile(hCom, buf, size, &bread, NULL))
@@ -269,7 +278,7 @@ int serial_open(const char *port)
 
     if (port[0] != '\\')
     {
-        _snprintf(full_path, sizeof(full_path) - 1, "\\\\.\\%s", port);
+        _snprintf_s(full_path, sizeof(full_path) - 1, "\\\\.\\%s", port);
         port = full_path;
     }
 
@@ -282,7 +291,7 @@ int serial_open(const char *port)
     }
     else
     {
-        fd = (int)hCom;
+        fd = _open_osfhandle(reinterpret_cast<intptr_t>(hCom),0);
     }
 #else
     fd = open(port, O_RDWR | O_NOCTTY);
@@ -298,7 +307,7 @@ int serial_open(const char *port)
 int serial_close(int fd)
 {
 #ifdef WIN32
-    HANDLE hCom = (HANDLE)fd;
+    HANDLE hCom = reinterpret_cast<HANDLE>(_get_osfhandle(fd));
 
     CloseHandle(hCom);
 #else

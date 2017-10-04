@@ -34,7 +34,11 @@
 #include "serial.h"
 #include <cstdio>
 #include <string>
+#ifdef WIN32
+#include <io.h>
+#else
 #include <termios.h>
+#endif
 
 using namespace erpc;
 
@@ -61,7 +65,7 @@ erpc_status_t SerialTransport::init(uint8_t vtime, uint8_t vmin)
     {
         return kErpcStatus_InitFailed;
     }
-    if (!isatty(m_serialHandle))
+    if (!_isatty(m_serialHandle))
     {
         return kErpcStatus_InitFailed;
     }
@@ -73,10 +77,17 @@ erpc_status_t SerialTransport::init(uint8_t vtime, uint8_t vmin)
     {
         return kErpcStatus_InitFailed;
     }
+#ifdef WIN32
+	if (0 == PurgeComm(reinterpret_cast<HANDLE>(_get_osfhandle(m_serialHandle)), PURGE_RXABORT | PURGE_RXCLEAR | PURGE_TXABORT | PURGE_TXCLEAR))
+	{
+		return kErpcStatus_InitFailed;
+	}
+#else
     if (-1 == tcflush(m_serialHandle, TCIOFLUSH))
     {
         return kErpcStatus_InitFailed;
     }
+#endif // WIN32
     return kErpcStatus_Success;
 }
 

@@ -34,7 +34,12 @@
 
 #include "framed_transport.h"
 #include <string>
+#include "serial.h"
+#ifndef WIN32
 #include <termios.h>
+#endif // !WIN32
+
+
 
 /*!
  * @addtogroup serial_transport
