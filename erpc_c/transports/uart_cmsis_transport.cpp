@@ -40,7 +40,7 @@ using namespace erpc;
 
 static volatile bool s_isTransferReceiveCompleted = false;
 static volatile bool s_isTransferSendCompleted = false;
-constexpr auto kStatus_Success = ARM_DRIVER_OK;
+static const erpc_status_t kStatus_Success = ARM_DRIVER_OK;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Code

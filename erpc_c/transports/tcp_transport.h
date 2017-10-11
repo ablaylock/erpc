@@ -34,6 +34,8 @@
 #include "erpc_threading.h"
 #include "framed_transport.h"
 
+#define CLIENT 1
+
 /*!
  * @addtogroup tcp_transport
  * @{
@@ -107,7 +109,9 @@ protected:
     const char *m_host;    /*!< Specify the host name or IP address of the computer. */
     uint16_t m_port;       /*!< Specify the listening port number. */
     int m_socket;          /*!< Socket number. */
+#ifndef CLIENT
     Thread m_serverThread; /*!< Pointer to server thread. */
+#endif
     bool m_runServer;      /*!< Thread is executed while this is true. */
 
     /*!
@@ -142,6 +146,7 @@ protected:
      */
     virtual erpc_status_t underlyingSend(const uint8_t *data, uint32_t size);
 
+#ifndef CLIENT
     /*!
      * @brief Server thread function.
      */
@@ -157,6 +162,7 @@ protected:
      *  this argument.
      */
     static void serverThreadStub(void *arg);
+#endif
 };
 
 } // namespace erpc

@@ -228,6 +228,8 @@ erpc_transport_t erpc_transport_rpmsg_linux_init(int16_t local_addr, int8_t type
  */
 void erpc_transport_rpmsg_linux_deinit();
 
+erpc_transport_t erpc_transport_keil_tcp_init(bool isServer, const int32_t tcpSock, const uint16_t port);
+
 #ifdef __cplusplus
 }
 #endif

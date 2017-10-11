@@ -161,9 +161,9 @@ int serial_set_read_timeout(int fd, uint8_t vtime, uint8_t vmin)
         // setting all these values to 0 results in no timeout
         // so set them to a minimum value, this will return immediately
         // if there is no data available
-        timeouts.ReadIntervalTimeout = 1;
-        timeouts.ReadTotalTimeoutMultiplier = 1;
-        timeouts.ReadTotalTimeoutConstant = 1;
+        timeouts.ReadIntervalTimeout = 100;
+        timeouts.ReadTotalTimeoutMultiplier = 100;
+        timeouts.ReadTotalTimeoutConstant = 100;
         timeouts.WriteTotalTimeoutMultiplier = 0;
         timeouts.WriteTotalTimeoutConstant = 0;
     }

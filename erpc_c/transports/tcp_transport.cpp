@@ -30,21 +30,32 @@
  */
 #include "tcp_transport.h"
 #include <cstdio>
-#include <err.h>
 #include <errno.h>
-#include <netdb.h>
 #include <new>
 #include <signal.h>
 #include <string>
+
+#ifdef WIN32
+#include <winsock2.h>
+#include <ws2tcpip.h>
+
+ // Need to link with Ws2_32.lib, Mswsock.lib, and Advapi32.lib
+#pragma comment (lib, "Ws2_32.lib")
+#pragma comment (lib, "Mswsock.lib")
+#pragma comment (lib, "AdvApi32.lib")
+#else
+#include <err.h>
+#include <netdb.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
+#endif
 
 using namespace erpc;
 
 // Set this to 1 to enabke debug logging.
 // TODO fix issue with the transport not working on Linux if debug logging is disabled.
-#define TCP_TRANSPORT_DEBUG_LOG (1)
+#define TCP_TRANSPORT_DEBUG_LOG (0)
 
 #if TCP_TRANSPORT_DEBUG_LOG
 #define TCP_DEBUG_PRINT(_fmt_, ...) printf(_fmt_, ##__VA_ARGS__)
@@ -63,7 +74,9 @@ TCPTransport::TCPTransport(bool isServer)
 , m_host(NULL)
 , m_port(0)
 , m_socket(-1)
+#ifndef CLIENT
 , m_serverThread(serverThreadStub)
+#endif
 , m_runServer(true)
 {
 }
@@ -73,7 +86,9 @@ TCPTransport::TCPTransport(const char *host, uint16_t port, bool isServer)
 , m_host(host)
 , m_port(port)
 , m_socket(-1)
+#ifndef CLIENT
 , m_serverThread(serverThreadStub)
+#endif
 , m_runServer(true)
 {
 }
@@ -93,7 +108,9 @@ erpc_status_t TCPTransport::open()
     if (m_isServer)
     {
         m_runServer = true;
+#ifndef CLIENT
         m_serverThread.start(this);
+#endif
         return kErpcStatus_Success;
     }
     else
@@ -112,7 +129,7 @@ erpc_status_t TCPTransport::connectClient()
 
     // Fill in hints structure for getaddrinfo.
     struct addrinfo hints = { 0 };
-    hints.ai_flags = AI_NUMERICSERV;
+//    hints.ai_flags = AI_NUMERICSERV;
     hints.ai_family = PF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
 
@@ -143,10 +160,25 @@ erpc_status_t TCPTransport::connectClient()
             continue;
         }
 
+		DWORD timeout = 100;
+		if (setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, reinterpret_cast<const char*>(&timeout), sizeof(timeout)) != 0)
+		{
+			::closesocket(sock);
+			sock = -1;
+			continue;
+		}
+
+		if (setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, reinterpret_cast<const char*>(&timeout), sizeof(timeout)) != 0)
+		{
+			::closesocket(sock);
+			sock = -1;
+			continue;
+		}
+
         // Attempt to connect.
         if (connect(sock, res->ai_addr, res->ai_addrlen) < 0)
         {
-            ::close(sock);
+            ::closesocket(sock);
             sock = -1;
             continue;
         }
@@ -174,11 +206,11 @@ erpc_status_t TCPTransport::connectClient()
     int set = 1;
     if (setsockopt(sock, SOL_SOCKET, SO_NOSIGPIPE, (void *)&set, sizeof(int)) < 0)
     {
-        ::close(sock);
+        ::closesocket(sock);
         TCP_DEBUG_ERR("setsockopt failed");
         return kErpcStatus_Fail;
     }
-#else
+#elif !defined(WIN32)
     // globally disable the SIGPIPE signal
     signal(SIGPIPE, SIG_IGN);
 #endif // defined(SO_NOSIGPIPE)
@@ -196,7 +228,7 @@ erpc_status_t TCPTransport::close()
 
     if (m_socket != -1)
     {
-        ::close(m_socket);
+        ::closesocket(m_socket);
         m_socket = -1;
     }
 
@@ -205,22 +237,29 @@ erpc_status_t TCPTransport::close()
 
 erpc_status_t TCPTransport::underlyingReceive(uint8_t *data, uint32_t size)
 {
+#ifndef CLIENT
     // Block until we have a valid connection.
     while (m_socket <= 0)
     {
         // Sleep 10 ms.
         Thread::sleep(10000);
     }
+#else
+	if (m_socket <= 0)
+	{
+		return kErpcStatus_ConnectionClosed;
+	}
+#endif
 
-    ssize_t length = 0;
+    auto length = 0;
 
     // Loop until all requested data is received.
     while (size)
     {
-        length = read(m_socket, data, size);
+        length = ::recv(m_socket, reinterpret_cast<char*>(data), size, 0);
 
         // Length will be zero if the connection is closed.
-        if (length == 0)
+        if (length == 0 || length == SOCKET_ERROR)
         {
             close();
             return kErpcStatus_ConnectionClosed;
@@ -249,7 +288,7 @@ erpc_status_t TCPTransport::underlyingSend(const uint8_t *data, uint32_t size)
     // Loop until all data is sent.
     while (size)
     {
-        ssize_t result = write(m_socket, data, size);
+        auto result = ::send(m_socket, reinterpret_cast<const char*>(data), size,0);
         if (result >= 0)
         {
             size -= result;
@@ -270,6 +309,7 @@ erpc_status_t TCPTransport::underlyingSend(const uint8_t *data, uint32_t size)
     return kErpcStatus_Success;
 }
 
+#ifndef CLIENT
 void TCPTransport::serverThread()
 {
     TCP_DEBUG_PRINT("in server thread\n");
@@ -347,3 +387,5 @@ void TCPTransport::serverThreadStub(void *arg)
         This->serverThread();
     }
 }
+
+#endif
