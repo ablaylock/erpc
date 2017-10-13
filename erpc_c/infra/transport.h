@@ -33,7 +33,7 @@
 #define _EMBEDDED_RPC__TRANSPORT_H_
 
 #include "erpc_common.h"
-#include "crc16.h"
+#include "crc_algorithm.h"
 #include "message_buffer.h"
 #include <cstring>
 
@@ -103,11 +103,11 @@ public:
     virtual bool hasMessage() { return true; }
 
     /*!
-     * @brief This functions sets thre CRC-16 implementation.
+     * @brief This functions sets thre CRC implementation.
      *
-     * @param[in] crcImpl Object containing crc-16 compute function.
+     * @param[in] crcImpl Object containing crc compute function.
      */
-    virtual void setCrc16(Crc16 *crcImpl){};
+    virtual void setCrc(CrcAlgorithm *crcImpl){};
 };
 
 /*!

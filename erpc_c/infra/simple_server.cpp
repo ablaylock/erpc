@@ -139,9 +139,43 @@ erpc_status_t SimpleServer::runInternalEnd(Codec *codec, message_type_t msgType,
 
     if (err)
     {
-        // Dispose of buffers and codecs.
-        disposeBufferAndCodec(codec);
-        return err;
+        // Send the processMessage error back to the host as a notification
+        // preparing MessageBuffer for serializing data
+        erpc_status_t err2 = m_messageFactory->prepareServerBufferForSend(codec->getBuffer());
+
+        // preparing codec for serializing data
+        codec->reset();
+
+        // Build response message.
+        if (!err2)
+        {
+            err2 = codec->startWriteMessage(kNotificationMessage, serviceId, methodId, sequence);
+        }
+
+        // Write the notification type
+        const uint8_t notifyType = kErrorNotify;
+        if (!err2)
+        {
+            err2 = codec->write(notifyType);
+        }
+
+        // Write the actual error
+        if (!err2)
+        {
+            err2 = codec->write(err);
+        }
+
+        if (!err2)
+        {
+            err2 = codec->endWriteMessage();
+        }
+
+        if(err2)
+        {
+            // Dispose of buffers and codecs.
+            disposeBufferAndCodec(codec);
+            return err2;
+        }
     }
 
     if (msgType != kOnewayMessage)

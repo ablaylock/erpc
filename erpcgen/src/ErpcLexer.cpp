@@ -250,7 +250,7 @@ CurrentFileInfo *ErpcLexer::openFile(const std::string &fileName)
     /* Counting CRC16 for Generator. */
     std::string str((std::istreambuf_iterator<char>(*inputFile)), std::istreambuf_iterator<char>());
     erpc::Crc16 crc16 = erpc::Crc16(ERPC_VERSION_NUMBER);
-    m_idlCrc16 += crc16.computeCRC16((const uint8_t *)str.c_str(), str.size());
+    m_idlCrc16 += crc16.computeCRC((const uint8_t *)str.c_str(), str.size());
 
     /* Reset state to beginning of file. */
     inputFile->clear();

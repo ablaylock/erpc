@@ -35,6 +35,7 @@
 #include "erpc_common.h"
 #include "erpc_config_internal.h"
 #include "erpc_mbf_setup.h"
+#include "erpc_crc_setup.h"
 #if ERPC_NESTED_CALLS
 #include "erpc_server_setup.h"
 #endif
@@ -68,7 +69,7 @@ extern "C" {
  *
  * This function initializes client with all components necessary for serve client request.
  */
-void erpc_client_init(erpc_transport_t transport, erpc_mbf_t message_buffer_factory);
+void erpc_client_init(erpc_transport_t transport, erpc_mbf_t message_buffer_factory, erpc_crc_t crc_algorithm);
 
 /*!
  * @brief This function set error handler function.

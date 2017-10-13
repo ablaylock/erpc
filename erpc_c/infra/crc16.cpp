@@ -36,8 +36,8 @@ using namespace erpc;
 // Code
 ////////////////////////////////////////////////////////////////////////////////
 
-Crc16::Crc16(uint32_t crcStart)
-: m_crcStart(crcStart)
+Crc16::Crc16(uint32_t crcStart) : 
+	m_crcStart(crcStart)
 {
 }
 
@@ -45,7 +45,7 @@ Crc16::~Crc16()
 {
 }
 
-uint16_t Crc16::computeCRC16(const uint8_t *data, uint32_t lengthInBytes)
+uint16_t Crc16::computeCRC(const uint8_t *data, uint32_t lengthInBytes)
 {
     uint32_t crc = m_crcStart;
 

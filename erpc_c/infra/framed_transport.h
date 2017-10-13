@@ -127,10 +127,10 @@ public:
      *
      * @param[in] crcImpl Object containing crc-16 compute function.
      */
-    virtual void setCrc16(Crc16 *crcImpl);
+    virtual void setCrc(CrcAlgorithm *crcImpl);
 
 protected:
-    Crc16 *m_crcImpl; /*!< CRC object. */
+	CrcAlgorithm *m_crcImpl; /*!< CRC object. */
 
 #if ERPC_THREADS
     Mutex m_sendLock;    //!< Mutex protecting send.

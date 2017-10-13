@@ -56,8 +56,20 @@ typedef enum _message_type {
     kInvocationMessage = 0,
     kOnewayMessage,
     kReplyMessage,
-    kNotificationMessage
+    kNotificationMessage,
+
+	//! BasicCodec encodes message_type_t into 8 bits
+	kMaxMessage = 0xFFU 
 } message_type_t;
+
+typedef enum _notification_type {
+	kErrorNotify,
+
+	//! BasicCodec encodes notification_type_t into 8 bits
+	kMaxNotify = 0xFFU 
+} notification_type_t;
+
+
 
 /*!
  * @brief Abstract serialization encoder/decoder interface.

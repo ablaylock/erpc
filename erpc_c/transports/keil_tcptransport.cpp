@@ -50,8 +50,9 @@ erpc_status_t Keil_TCPTransport::close()
 
 erpc_status_t Keil_TCPTransport::underlyingReceive(uint8_t *data, uint32_t size)
 {
-    struct RXDataBlock* block = nullptr;;
-    while(size)
+    struct RXDataBlock* block = nullptr;
+	const auto start_size = size;
+    while(size && start_size >= size)
     {
         eth_recive_queue.pop(block,BLOCK::FOREVER);
         memcpy(data,block->buffer,block->size);
@@ -59,7 +60,7 @@ erpc_status_t Keil_TCPTransport::underlyingReceive(uint8_t *data, uint32_t size)
         size -= block->size;
         rx_memory_pool.free(block);
     }
-    return kErpcStatus_Success;
+    return start_size >= size ? kErpcStatus_Success : kErpcStatus_ReceiveFailed;
 }
 
 erpc_status_t Keil_TCPTransport::underlyingSend(const uint8_t *data, uint32_t size)

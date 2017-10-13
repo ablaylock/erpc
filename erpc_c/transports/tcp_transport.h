@@ -34,6 +34,11 @@
 #include "erpc_threading.h"
 #include "framed_transport.h"
 
+#ifdef WIN32
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#endif
+
 #define CLIENT 1
 
 /*!
@@ -108,7 +113,12 @@ protected:
     bool m_isServer;       /*!< If true then server is using transport, else client. */
     const char *m_host;    /*!< Specify the host name or IP address of the computer. */
     uint16_t m_port;       /*!< Specify the listening port number. */
+#ifdef WIN32
+	SOCKET m_socket;          /*!< Socket number. */
+#else
     int m_socket;          /*!< Socket number. */
+#endif
+
 #ifndef CLIENT
     Thread m_serverThread; /*!< Pointer to server thread. */
 #endif

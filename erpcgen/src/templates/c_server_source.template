@@ -57,7 +57,7 @@ erpc_status_t {$iface.serviceClassName}::handleInvocation(uint32_t methodId, uin
 
 {%  endfor -- fn %}
         default:
-            return kErpcStatus_InvalidArgument;
+            return kErpcStatus_UnknownCallback;
     }
 }
 {%  for fn in iface.functions %}

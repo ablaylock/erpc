@@ -14,7 +14,7 @@
 {% enddef --checkVersion %}
 
 {% def checkCrc() %}
-#if !defined(ERPC_GENERATED_CRC) || ERPC_GENERATED_CRC != {$crc16}
+#if !defined(ERPC_USE_CUSTOM_CRC) && (!defined(ERPC_GENERATED_CRC) || ERPC_GENERATED_CRC != {$crc16})
 #error "Macro 'ERPC_GENERATED_CRC' should be defined with value {$crc16}."
 #endif
 {% enddef --checkCrc %}

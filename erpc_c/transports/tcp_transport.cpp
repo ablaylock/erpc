@@ -149,7 +149,12 @@ erpc_status_t TCPTransport::connectClient()
 
     // Iterate over result addresses and try to connect. Exit the loop on the first successful
     // connection.
-    int sock = -1;
+#ifdef WIN32
+	SOCKET sock = INVALID_SOCKET;
+#else
+	int sock = -1;
+#endif
+    
     struct addrinfo *res;
     for (res = res0; res; res = res->ai_next)
     {
@@ -176,7 +181,7 @@ erpc_status_t TCPTransport::connectClient()
 		}
 
         // Attempt to connect.
-        if (connect(sock, res->ai_addr, res->ai_addrlen) < 0)
+        if (connect(sock, res->ai_addr, static_cast<int>(res->ai_addrlen)) < 0)
         {
             ::closesocket(sock);
             sock = -1;

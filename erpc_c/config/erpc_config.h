@@ -118,6 +118,22 @@
 //! Uncomment for using logging feature.
 //#define ERPC_MESSAGE_LOGGING (ERPC_MESSAGE_LOGGING_ENABLED)
 
+//! @def ERPC_CRC_DYNAMIC
+//!
+//! Enable eRPC to dynamically allocate CRC algorithms. Some CRC algorithms maintain state between calls requiring unique
+//! objects when running multiple servers/clients.
+//!
+//! Uncomment to enable dynamically allocated CRC algorithms.
+//#define ERPC_CRC_DYNAMIC (1)
+
+//! @def ERPC_USE_CUSTOM_CRC
+//!
+//! Enable eRPC to use a custom CRC algorithm. This disables CRC checking between generated files. It is upto the implementer to 
+//! ensure compatibility
+//!
+//! Uncomment to enable dynamically allocated CRC algorithms.
+#define ERPC_USE_CUSTOM_CRC (1)
+
 //@}
 
 /*! @} */

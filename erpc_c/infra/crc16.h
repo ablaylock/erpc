@@ -32,6 +32,7 @@
 #define _EMBEDDED_RPC__CRC16_H_
 
 #include <stdint.h>
+#include "crc_algorithm.h"
 
 /*!
  * @addtogroup infra_transport
@@ -45,7 +46,7 @@
 
 namespace erpc {
 
-class Crc16
+class Crc16 : public CrcAlgorithm
 {
 public:
     /*!
@@ -54,19 +55,21 @@ public:
     Crc16(uint32_t crcStart);
 
     /*!
-     * @brief Codec destructor
+     * @brief CRC16 destructor
      */
-    ~Crc16();
+    virtual ~Crc16();
 
     /*!
-     * @brief Compute a ITU-CCITT CRC-16 over the provided data.
+     * @brief Compute a CRC-16 over the provided data.
      *
      * This implementation is slow but small in size.
      *
      * @param[in] data Pointer to data used for crc16.
      * @param[in] dataLength Data length.
      */
-    uint16_t computeCRC16(const uint8_t *data, uint32_t lengthInBytes);
+    uint16_t computeCRC(const uint8_t *data, uint32_t lengthInBytes);
+
+
 
 protected:
     uint32_t m_crcStart; /*!< CRC start number. */

@@ -48,7 +48,6 @@ using namespace erpc;
 static ManuallyConstructed<ClientManager> s_client;
 ClientManager *g_client;
 static ManuallyConstructed<BasicCodecFactory> s_codecFactory;
-static ManuallyConstructed<Crc16> s_crc16;
 
 extern const uint32_t erpc_generated_crc;
 
@@ -56,7 +55,7 @@ extern const uint32_t erpc_generated_crc;
 // Code
 ////////////////////////////////////////////////////////////////////////////////
 
-void erpc_client_init(erpc_transport_t transport, erpc_mbf_t message_buffer_factory)
+void erpc_client_init(erpc_transport_t transport, erpc_mbf_t message_buffer_factory, erpc_crc_t crc_algorithm)
 {
     assert(transport);
 
@@ -66,8 +65,7 @@ void erpc_client_init(erpc_transport_t transport, erpc_mbf_t message_buffer_fact
     // Init client manager with the provided transport.
     s_client.construct();
     Transport *castedTransport = reinterpret_cast<Transport *>(transport);
-    s_crc16.construct(erpc_generated_crc);
-    castedTransport->setCrc16(s_crc16.get());
+    castedTransport->setCrc(reinterpret_cast<CrcAlgorithm*>(crc_algorithm));
     s_client->setTransport(castedTransport);
     s_client->setCodecFactory(s_codecFactory);
     s_client->setMessageBufferFactory(reinterpret_cast<MessageBufferFactory *>(message_buffer_factory));
@@ -98,7 +96,6 @@ bool erpc_server_add_message_logger(erpc_transport_t transport)
 
 void erpc_client_deinit()
 {
-    s_crc16.destroy();
     s_client.destroy();
     s_codecFactory.destroy();
 }

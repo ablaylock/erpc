@@ -54,7 +54,7 @@ FramedTransport::~FramedTransport()
 {
 }
 
-void FramedTransport::setCrc16(Crc16 *crcImpl)
+void FramedTransport::setCrc(CrcAlgorithm *crcImpl)
 {
     assert(crcImpl);
     m_crcImpl = crcImpl;
@@ -92,7 +92,7 @@ erpc_status_t FramedTransport::receive(MessageBuffer *message)
     }
 
     // Verify CRC.
-    uint16_t computedCrc = m_crcImpl->computeCRC16(message->get(), h.m_messageSize);
+    uint16_t computedCrc = m_crcImpl->computeCRC(message->get(), h.m_messageSize);
     if (computedCrc != h.m_crc)
     {
         return kErpcStatus_CrcCheckFailed;
@@ -114,7 +114,7 @@ erpc_status_t FramedTransport::send(MessageBuffer *message)
     // Send header first.
     Header h;
     h.m_messageSize = messageLength;
-    h.m_crc = m_crcImpl->computeCRC16(message->get(), messageLength);
+    h.m_crc = m_crcImpl->computeCRC(message->get(), messageLength);
     erpc_status_t ret = underlyingSend((uint8_t *)&h, sizeof(h));
     if (ret != kErpcStatus_Success)
     {

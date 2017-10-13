@@ -101,7 +101,10 @@ enum _erpc_status
     kErpcStatus_NestedCallFailure,
 
     //! When sending address from bigger architecture to smaller.
-    kErpcStatus_BadAddressScale
+    kErpcStatus_BadAddressScale,
+
+	//! Failed to decode notification message
+	kErpcStatus_NotificationFailed
 };
 
 /*! @brief Type used for all status and error return values. */

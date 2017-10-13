@@ -183,10 +183,25 @@ erpc_status_t ClientManager::verifyReply(RequestContext &request)
     }
 
     // Verify that this is a reply to the request we just sent.
-    if (msgType != kReplyMessage || sequence != request.getSequence())
+    if (!(msgType == kReplyMessage || msgType == kNotificationMessage) || sequence != request.getSequence())
     {
         return kErpcStatus_ExpectedReply;
     }
+
+	if (msgType == kNotificationMessage)
+	{
+		uint8_t notifyType = 0;
+		erpc_status_t err = 0;
+		request.getCodec()->read(&notifyType);
+		switch (static_cast<notification_type_t>(notifyType))
+		{
+		case kErrorNotify:
+			request.getCodec()->read(&err);
+			return err;
+		default:
+			return kErpcStatus_NotificationFailed;
+		}
+	}
 
     return kErpcStatus_Success;
 }
