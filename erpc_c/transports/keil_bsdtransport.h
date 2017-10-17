@@ -1,23 +1,14 @@
-#ifndef KEIL_TCPTRANSPORT_H
-#define KEIL_TCPTRANSPORT_H
+#ifndef KEIL_BSDTRANSPORT_H
+#define KEIL_BSDTRANSPORT_H
 
 #include "framed_transport.h"
 
-
 namespace erpc {
 
-class Keil_TCPTransport : public FramedTransport
+class Keil_BSDTransport : public FramedTransport
 {
 public:
-    Keil_TCPTransport(bool isServer, const int32_t tcpSock, const uint16_t port);
-
-    /*!
-     * @brief This function will create host on server side, or connect client to the server.
-     *
-     * @retval #kErpcStatus_Success When creating host was successful or client connected successfully.
-     * @retval #kErpcStatus_ConnectionFailure Connecting to the specified host failed.
-     */
-    virtual erpc_status_t open();
+    Keil_BSDTransport(const int32_t tcpSock) : m_tcpSocket(tcpSock) {}
 
     /*!
      * @brief This function disconnects client or stop server host.
@@ -27,9 +18,7 @@ public:
     virtual erpc_status_t close();
 
 protected:
-    bool m_isServer;
     int32_t m_tcpSocket;
-    uint16_t m_port;
     /*!
      * @brief This function read data.
      *
@@ -57,4 +46,4 @@ protected:
 
 }
 
-#endif // KEIL_TCPTRANSPORT_H
+#endif // KEIL_BSDTRANSPORT_H

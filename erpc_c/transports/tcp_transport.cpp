@@ -165,7 +165,7 @@ erpc_status_t TCPTransport::connectClient()
             continue;
         }
 
-		DWORD timeout = 100;
+		DWORD timeout = 1000;
 		if (setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, reinterpret_cast<const char*>(&timeout), sizeof(timeout)) != 0)
 		{
 			::closesocket(sock);

@@ -131,7 +131,7 @@
 //! Enable eRPC to use a custom CRC algorithm. This disables CRC checking between generated files. It is upto the implementer to 
 //! ensure compatibility
 //!
-//! Uncomment to enable dynamically allocated CRC algorithms.
+//! Uncomment to enable custom CRC algorithms and values.
 #define ERPC_USE_CUSTOM_CRC (1)
 
 //@}

@@ -230,6 +230,10 @@ void erpc_transport_rpmsg_linux_deinit();
 
 erpc_transport_t erpc_transport_keil_tcp_init(bool isServer, const int32_t tcpSock, const uint16_t port);
 
+erpc_transport_t erpc_transport_keil_bsd_init(const int32_t tcpSock);
+
+void erpc_transport_keil_bsd_deinit();
+
 #ifdef __cplusplus
 }
 #endif
